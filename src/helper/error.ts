@@ -1,5 +1,3 @@
-import {Request} from "express";
-import {db} from "../db/database";
 
 class BaseError extends Error {
     constructor(message?: string) {
@@ -17,15 +15,4 @@ export class HttpRequestError extends BaseError {
         this.message = message || "Internal Server Error";
         this.error = error || null;
     }
-}
-
-export async function logErrorToDB(req: Request, generatedErrorId: string, errorStack: string | undefined) {
-    const endpoint = `${req.method} ${req.originalUrl}`;
-    await db.insertInto("auditError")
-        .values({
-            id: generatedErrorId,
-            endpoint: endpoint,
-            errorTrace: errorStack || "No error message",
-        })
-        .executeTakeFirst();
 }
