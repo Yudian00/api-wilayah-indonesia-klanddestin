@@ -38,7 +38,7 @@ export class App {
             res.status(200).json({
                 success: true,
                 message: "Wilayah API Indonesia",
-                version: "1.1.0",
+                version: "1.0.0",
             });
             return
         })
