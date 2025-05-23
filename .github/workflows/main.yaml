@@ -1,0 +1,45 @@
+on:
+  push:
+    branches:
+      - main
+name: 🚀 Deploy website on push
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branches name
+        run: echo "Branch name is ${{ github.ref }} - ${{ github.ref_name }}"
+
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: 🫵 Add TSLIB
+        run: npm install tslib
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🛠️ Build project
+        run: npm run build
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: '/api-wilayah-indonesia.klandestin.id/'
+
+      - name: 🔄 Restart Node.js services
+        if: ${{ success() }}
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 64000
+          script: |
+            source /home/klandest/nodevenv/api-wilayah-indonesia.klandestin.id/20/bin/activate && cd /home/klandest/api-wilayah-indonesia.klandestin.id
+            npm install &&
+            npx pm2 restart all
